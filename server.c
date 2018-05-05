@@ -46,7 +46,7 @@ int main (int argc, char *argv[ ])
 	/* Set local interface for outbound multicast datagrams. */
 	/* The IP address specified must be associated with a local, */
 	/* multicast capable interface. */
-	localInterface.s_addr = inet_addr("192.168.32.143");
+	localInterface.s_addr = inet_addr("127.0.0.1");
 	if(setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
 	{
 	  perror("Setting local interface error");
@@ -62,8 +62,52 @@ int main (int argc, char *argv[ ])
 		perror("Sending datagram message error");
 	}
 	else
+    {
 	  printf("Sending datagram message...OK\n");
-	 
+    } 
+    FILE *fp;
+    fp=fopen("img20.jpg","r");
+    int sizeu;
+    fseek(fp,0,SEEK_END);
+    sizeu=ftell(fp);
+    printf("%d\n",sizeu);
+    fseek(fp,0,SEEK_SET);
+    int g=sendto(sd,&sizeu,sizeof(sizeu),0,(struct sockaddr *)&groupSock,sizeof(groupSock));
+    char send_bufferu[sizeu];
+    while(!feof(fp))
+    {
+        bzero(send_bufferu,sizeof(send_bufferu));
+        int ret=fread(send_bufferu,1,sizeu,fp);
+        int bbc;
+        int chat=0;
+        while(sizeu>0)
+        {
+            sizeu-=60000;
+            chat++;
+        }
+        int o;
+        while(ret>0)
+        {
+            ret=fread(send_bufferu,1,sizeu,fp);
+            for(bbc=0;bbc<chat;bbc++)
+            {
+                char send_bufferuu[60000];
+                int i;
+                for(i=0;i<60000;i++)
+                {
+                    send_bufferuu[i]=send_bufferu[i+bbc*60000];
+                }
+              o=sendto(sd,send_bufferuu,60000,0,(struct sockaddr*)&groupSock,sizeof(groupSock));
+              printf("%d\n",o);
+            }
+            if(o<0)
+            {
+                printf("error\n");
+            }
+        }
+     }
+    fclose(fp);
+
 	/* Try the re-read from the socket if the loopback is not disable
 	if(read(sd, databuf, datalen) < 0)
 	{

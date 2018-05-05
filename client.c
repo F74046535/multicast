@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	/* called for each local interface over which the multicast */
 	/* datagrams are to be received. */
 	group.imr_multiaddr.s_addr = inet_addr("226.1.1.1");
-	group.imr_interface.s_addr = inet_addr("192.168.32.143");
+	group.imr_interface.s_addr = inet_addr("127.0.0.1");
 	if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
 	{
 		perror("Adding multicast group error");
@@ -80,5 +80,46 @@ int main(int argc, char *argv[])
 		printf("Reading datagram message...OK.\n");
 		printf("The message from multicast server is: \"%s\"\n", databuf);
 	}
+     int sizeu;
+    //int w=recvfrom(sd,&sizeu,sizeof(sizeu),0,(struct sockaddr*)&localSock,sizeof(localSock));
+    int w=read(sd,&sizeu,sizeof(sizeu));
+    printf("%d\n",sizeu);
+    printf("read picture in byte array!\n");
+    char p_arrayu[240000];
+    char p_arrayuu[240000];
+    int bbc;
+    printf("yes\n");
+    int cc;
+    int m=0;
+    for(cc=0;cc<3;cc++)
+    {   
+        sizeu=sizeu-60000;
+        m++;
+        if(sizeu<0)
+        {
+            break;
+        }
+    }
+    for(bbc=0;bbc<m;bbc++)
+    {
+        //int v=recvfrom(sd,p_arrayu,60000,0,(struct sockaddr *)&localSock,sizeof(localSock));
+        printf("yes\n");
+        int v=read(sd,p_arrayu,60000);
+        int i=0;
+        for(i=0;i<60000;i++)
+        {
+            p_arrayuu[i+bbc*60000]=p_arrayu[i];
+        }
+        
+    }
+    FILE *imgu;
+    imgu=fopen("c1.jpg","w");
+    fwrite(p_arrayuu,1,sizeof(p_arrayuu),imgu);
+    printf("the file is sent sucessfully");
+    printf("the new file is c1.jpg");
+    fclose(imgu);
+
+    
+
 	return 0;
 }
